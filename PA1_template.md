@@ -1,16 +1,12 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 # Loading and preprocessing the data
 
 ### Load packages
 
-```{r message = FALSE}
+
+```r
 library(dplyr)
 library(ggplot2)
 library(knitr)
@@ -21,14 +17,16 @@ library(RColorBrewer)
 
 NOTE: It is assumed that you have already downloaded the activity.csv and saved it in your working directory.
 
-```{r}
+
+```r
 ActivityData <- read.csv("activity.csv", header = TRUE)
 ActivityData$date <- as.POSIXct(ActivityData$date, format="%Y-%m-%d")
 ```
 
 ### Transform the data for analysis
 
-```{r}
+
+```r
 ActivityData <- ActivityData %>%
         mutate(dayofweek = weekdays(date)) %>%
         mutate(daytype = ifelse(dayofweek %in% c("Saturday", "Sunday"), "Weekend", "Weekday"))
@@ -36,7 +34,8 @@ ActivityData <- ActivityData %>%
 
 # What is mean total number of steps taken per day?
 
-```{r fig.align="center"}
+
+```r
 StepsPerDay <- ActivityData %>%
         na.omit() %>%
         select(date, steps) %>%
@@ -50,17 +49,32 @@ g1 + geom_histogram(color = "Black", fill = "DarkOrchid", binwidth = 1000) +
              y = "Frequency") 
 ```
 
+<img src="PA1_template_files/figure-html/unnamed-chunk-4-1.png" style="display: block; margin: auto;" />
+
 ### What are the mean and median steps per day?
 
-```{r}
+
+```r
 mean(StepsPerDay$TotalSteps)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 median(StepsPerDay$TotalSteps)
+```
+
+```
+## [1] 10765
 ```
 
 
 # What is the average daily activity pattern?
 
-```{r fig.align="center"}
+
+```r
 DailyPattern <- ActivityData %>%
         na.omit() %>%
         select(interval, steps) %>%
@@ -73,12 +87,22 @@ g2 + geom_line(color = "DarkBlue") +
         labs(x = "Interval",
              y = "Average Steps") 
 ```
+
+<img src="PA1_template_files/figure-html/unnamed-chunk-6-1.png" style="display: block; margin: auto;" />
    
 ### Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?  
 
-```{r}
+
+```r
 DailyPattern %>%
         filter(AverageSteps == max(AverageSteps))
+```
+
+```
+## # A tibble: 1 × 2
+##   interval AverageSteps
+##      <int>        <dbl>
+## 1      835     206.1698
 ```
         
 
@@ -86,13 +110,19 @@ DailyPattern %>%
 
 ### What is the total number of missing values in the dataset?
 
-```{r}
+
+```r
 sum(is.na(ActivityData$steps))
+```
+
+```
+## [1] 2304
 ```
 
 ### Impute missing values with interval median
 
-```{r}
+
+```r
 NAReplaceActivityData <- ActivityData %>% 
         group_by(interval) %>%
         mutate(steps = replace(steps, is.na(steps), median(steps, na.rm=TRUE)))
@@ -100,7 +130,8 @@ NAReplaceActivityData <- ActivityData %>%
 
 ### Total number of steps taken per day with missing values replaced
 
-```{r fig.align="center"}
+
+```r
 NAReplaceStepsPerDay <- NAReplaceActivityData %>%
         ungroup(interval) %>%
         select(date, steps) %>%
@@ -114,11 +145,25 @@ g3 + geom_histogram(color = "Black", fill = "DarkGreen", binwidth = 1000) +
              y = "Frequency") 
 ```
 
+<img src="PA1_template_files/figure-html/unnamed-chunk-10-1.png" style="display: block; margin: auto;" />
+
 ### Calculate and report the mean and median total number of steps taken per day
 
-```{r}             
+
+```r
 mean(NAReplaceStepsPerDay$TotalSteps)
+```
+
+```
+## [1] 9503.869
+```
+
+```r
 median(NAReplaceStepsPerDay$TotalSteps)             
+```
+
+```
+## [1] 10395
 ```
       
 ### Do these values differ from the estimates from the first part of the assignment? 
@@ -129,7 +174,8 @@ By replacing the missing values with the median for the specified interval, the 
 
 # Are there differences in activity patterns between weekdays and weekends?
 
-```{r fig.align="center"}
+
+```r
 DailyPatternWkd <- NAReplaceActivityData %>%
         ungroup(interval) %>%
         select(daytype, interval, steps) %>%
@@ -144,6 +190,8 @@ g4 + geom_line() +
              y = "Average Steps")  +
         theme(legend.position = "none")
 ```
+
+<img src="PA1_template_files/figure-html/unnamed-chunk-12-1.png" style="display: block; margin: auto;" />
           
              
              
